@@ -17,7 +17,7 @@ public class MessageHandler {
     }
 
     public void printEventMessage(String msg) {
-        out.printf("    %s%n", msg);
+        out.printf("    - %s%n", msg);
     }
 
     public void printCurrentState(State state, Garage garage) {

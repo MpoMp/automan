@@ -5,6 +5,7 @@ package automan;
 
 import automan.handlers.GarageHandler;
 import automan.handlers.MessageHandler;
+import automan.stateful.NameRegistry;
 import org.tinylog.Logger;
 
 import java.io.InputStream;
@@ -22,10 +23,11 @@ public class AutomanEngine {
         out.println("Welcome to Automan!");
         try {
             MessageHandler messageHandler = new MessageHandler(out);
+            NameRegistry nameRegistry = new NameRegistry();
 
             Core core = new Core(out,
                     in,
-                    new GarageHandler(new Random(), messageHandler),
+                    new GarageHandler(new Random(), messageHandler, nameRegistry),
                     messageHandler);
             core.run();
         } catch (Exception e) {

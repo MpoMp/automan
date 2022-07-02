@@ -64,18 +64,22 @@ public class Core implements Runnable {
     }
 
     private void runGameLoop(Scanner in, State state, Garage garage) {
+        // open time check
         if (state.getCurrentTime() == garage.getOpenTime()) {
             messageHandler.printEventMessage("%s is open for the day!".formatted(garage.getGarageName()));
         }
 
+        // currently open check
         if (garage.isOpenAtTime(state.getCurrentTime())) {
             messageHandler.printCurrentState(state, garage);
 
             garageHandler.handleWorkProgress(garage, STEP_DURATION);
         }
 
+        // time progress
         state.advanceTime(STEP_DURATION);
 
+        // end day and user input
         if (state.getCurrentTime() == DAY_END) {
             out.println("Proceed to next day (1), Exit (0):\n");
 
@@ -87,7 +91,7 @@ public class Core implements Runnable {
                         stop();
                     }
                     case "1" -> {
-                        out.println("EoD Status: ");
+                        out.println("EoD Status: "); // TODO garage print
                     }
                     default -> throw new IllegalStateException("Unexpected value: " + userInput);
                 }

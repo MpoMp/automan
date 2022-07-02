@@ -3,6 +3,7 @@ package automan.handlers;
 import automan.model.JobStatus;
 import automan.stateful.CarJob;
 import automan.stateful.Garage;
+import automan.stateful.NameRegistry;
 import org.tinylog.Logger;
 
 import java.time.Duration;
@@ -14,10 +15,12 @@ public class GarageHandler {
 
     private final Random rng;
     private final MessageHandler messageHandler;
+    private final NameRegistry nameRegistry;
 
-    public GarageHandler(Random rng, MessageHandler messageHandler) {
+    public GarageHandler(Random rng, MessageHandler messageHandler, NameRegistry nameRegistry) {
         this.rng = rng;
         this.messageHandler = messageHandler;
+        this.nameRegistry = nameRegistry;
     }
 
 
@@ -41,11 +44,12 @@ public class GarageHandler {
 
         garage.getAcceptedJobs().add(job);
         messageHandler.printEventMessage("Accepted new job from %s! We'll service their %s."
-                .formatted(job.getCustomer(), job.getCar()));
+                .formatted(job.getCustomer(), job.getCar())); //TODO print time estimation
     }
 
     private void progressExistingJobs(Garage garage, Duration stepDuration) {
         List<CarJob> jobsInProgress = garage.getJobsInProgress();
+        List<CarJob> completedJobs = garage.getCompletedJobs();
 
         // update WIP jobs
         for (Iterator<CarJob> iterator = jobsInProgress.iterator(); iterator.hasNext(); ) {
@@ -63,6 +67,7 @@ public class GarageHandler {
 
                 if (garage.getAvailableExitParkingSlots() > 0) {
                     iterator.remove();
+                    completedJobs.add(wipJob);
 
                     messageHandler.printEventMessage("Finished with %s. Parking it for %s to receive it."
                             .formatted(wipJob.getCar(), wipJob.getCustomer()));
@@ -71,7 +76,7 @@ public class GarageHandler {
                             .formatted(wipJob.getCar()));
                 }
             } else {
-                messageHandler.printEventMessage("Continuing with %s. Progress at %.2f%%."
+                messageHandler.printEventMessage("Continuing with %s. Progress at %.1f%%." // TODO add name
                         .formatted(wipJob.getCar(), wipJob.getCompletionPercentage()));
             }
         }
@@ -105,8 +110,8 @@ public class GarageHandler {
     private CarJob generateIncomingJob() {
         int rand = rng.nextInt(1, 10);
         CarJob incomingJob;
-        String custName = "John Wick";
-        String car = "Ford Focus ST";
+        String custName = nameRegistry.getRandomFullName();
+        String car = nameRegistry.getRandomCarName();
         if (rand <= 2) {
             incomingJob = null;
         } else if (rand <= 7) {
